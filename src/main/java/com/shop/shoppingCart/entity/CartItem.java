@@ -1,30 +1,25 @@
 package com.shop.shoppingCart.entity;
 
-import java.util.Set;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "Cart")
-public class Cart {
+@Table(name = "CartItem")
+public class CartItem {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Set<CartItem> items;
+	private String itemName;
+	private Integer quantity;
+	private Long price;
+	private String value;
 
-	@OneToOne(mappedBy = "cart")
-	private Customer customer;
 }

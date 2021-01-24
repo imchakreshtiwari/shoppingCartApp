@@ -9,12 +9,13 @@ import javax.mail.internet.AddressException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.shoppingCart.entity.Cart;
-import com.shop.shoppingCart.entity.Items;
+import com.shop.shoppingCart.entity.CartItem;
 import com.shop.shoppingCart.service.CartService;
 import com.shop.shoppingCart.service.SendMailService;
 
@@ -26,7 +27,6 @@ public class CartController {
 
 	@Autowired
 	private CartService cartService;
-	
 	
 	@Autowired
 	SendMailService sendMailService;
@@ -58,15 +58,41 @@ public class CartController {
 	}
 	
 	@GetMapping(value = "/cartitems")
-	public List<Items> getItems() {
+	public List<CartItem> getItems() {
 
 		log.info("Calling api to get all items");
 
-		List<Items> items = cartService.getAllItem();
+		List<CartItem> items = cartService.getAllItem();
 
 		return items;
 
 	}
 	
+	
+	@PutMapping(value = "/editItems")
+	public void editItems(@RequestBody Cart cart) {
+
+		log.info("Calling api to edit Items in cart");
+
+		cartService.editItemQuantity(cart);
+
+	}
+	
+	@PostMapping(value = "/checkOut")
+	public void checkOut(@RequestBody Cart cart) {
+
+		log.info("Calling api to get all items");
+
+		cartService.doCheckOut(cart);
+	}
+	
+	@GetMapping(value = "/confirmOrder")
+	public void confirmOrder() {
+
+		log.info("Calling api to get confirm order");
+
+		cartService.confirmOrder();
+
+	}
 	
 }

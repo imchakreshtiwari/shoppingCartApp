@@ -1,29 +1,22 @@
 package com.shop.shoppingCart.service;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.shop.shoppingCart.entity.Cart;
-import com.shop.shoppingCart.entity.Items;
+import com.shop.shoppingCart.entity.CartItem;
 import com.shop.shoppingCart.repository.CartRepository;
-import com.shop.shoppingCart.repository.ItemRepository;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @Service
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = "session")
 public class CartServiceImpl implements CartService, Serializable {
@@ -34,10 +27,11 @@ public class CartServiceImpl implements CartService, Serializable {
 	private CartRepository cartRepository;
 
 	@Autowired
-	private ItemRepository itemRepository;
-
-	@Autowired
 	private HttpSession httpSession;
+	
+	
+	@Autowired
+	SendMailService sendMailService;
 
 
 	@Override
@@ -50,20 +44,66 @@ public class CartServiceImpl implements CartService, Serializable {
 	@Override
 	public void removeItemFromCart(Cart cart) {
 
-		Set<Items> items = cart.getItems();
-		for (Items item : items) {
+		Set<CartItem> items = cart.getItems();
+		for (CartItem item : items) {
 			cartRepository.deleteFromCart(item.getId());
 		}
 	}
 
 	@Override
-	public List<Items> getAllItem() {
-		List<Items> items = new ArrayList<>();
+	public List<CartItem> getAllItem() {
+		List<CartItem> items = new ArrayList<>();
 		List<Cart> carts = cartRepository.findAll();
 		for (Cart cart : carts) {
-			items.addAll(cart.getItems());
+			items.add((CartItem) cart.getItems());
 		}
 		return items;
+	}
+
+	@Override
+	public Long doCheckOut(Cart cart) {
+		// TODO Auto-generated method stub
+		Set<CartItem> items = cart.getItems();
+		Long total = 0L;
+		for (CartItem cartItem: items) {
+			total += cartItem.getPrice() * cartItem.getQuantity();
+		}
+		
+		try {
+			sendMailService.sendingMail("chakresh@acis.io", "Message From XYZ", "BODY");
+		} catch (MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return total;
+	}
+
+	@Override
+	public void confirmOrder() {
+
+		try {
+			sendMailService.sendingMail("chakresh@acis.io", "Message From XYZ", "BODY");
+		} catch (MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void editItemQuantity(Cart cart) {
+		
+		Set<CartItem> items = cart.getItems();
+		for (CartItem cartItem: items) {
+			if (cartItem.getValue().equals("ADD")) {
+				int newQuantity = cartItem.getQuantity() + 1;
+				cartItem.setQuantity(newQuantity);
+			}else {
+				int newQuantity = cartItem.getQuantity() - 1;
+				cartItem.setQuantity(newQuantity);
+			}
+			
+		}
+		cartRepository.save(cart);
 	}
 
 }
